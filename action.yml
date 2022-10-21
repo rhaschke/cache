@@ -41,7 +41,9 @@ runs:
   using: 'node20'
   main: 'dist/restore/index.js'
   post: 'dist/save/index.js'
-  post-if: "success()"
+  post-if: |
+    ((env.GHA_CACHE_SAVE == 'always') && (success() || failure())) ||
+    ((env.GHA_CACHE_SAVE != 'never') && success())
 branding:
   icon: 'archive'
   color: 'gray-dark'
