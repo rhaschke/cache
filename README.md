@@ -81,6 +81,8 @@ If you are using a `self-hosted` Windows runner, `GNU tar` and `zstd` are requir
 
 * `SEGMENT_DOWNLOAD_TIMEOUT_MINS` - Segment download timeout (in minutes, default `10`) to abort download of the segment if not completed in the defined number of minutes. [Read more](https://github.com/actions/cache/blob/main/tips-and-workarounds.md#cache-segment-restore-timeout)
 
+* `GHA_CACHE_SAVE` - Controls when to save cache. By default, a new cache is created if the job completes successfully. If this variable is set to `always`, the cache is saved also on job failure. If set to `never`, the cache is never saved, i.e. realizing read-only cache.
+
 ### Outputs
 
 * `cache-hit` - A string value to indicate an exact match was found for the key.
