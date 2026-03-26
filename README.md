@@ -17,19 +17,31 @@ See ["Caching dependencies to speed up workflows"](https://docs.github.com/en/ac
 
 ### ⚠️ Important changes
 
+> [!IMPORTANT]
+> `actions/cache@v5` runs on the Node.js 24 runtime and requires a minimum Actions Runner version of `2.327.1`.
+> If you are using self-hosted runners, ensure they are updated before upgrading.
+
 The cache backend service has been rewritten from the ground up for improved performance and reliability. [actions/cache](https://github.com/actions/cache) now integrates with the new cache service (v2) APIs.
 
-The new service will gradually roll out as of **February 1st, 2025**. The legacy service will also be sunset on the same date. Changes in these release are **fully backward compatible**.
+The new service will gradually roll out as of **February 1st, 2025**. The legacy service will also be sunset on the same date. Changes in these releases are **fully backward compatible**.
 
 **We are deprecating some versions of this action**. We recommend upgrading to version `v4` or `v3` as soon as possible before **February 1st, 2025.** (Upgrade instructions below).
 
-If you are using pinned SHAs, please use the SHAs of versions `v4.2.0` or `v3.4.0`
+If you are using pinned SHAs, please use the SHAs of versions `v4.2.0` or `v3.4.0`.
 
 If you do not upgrade, all workflow runs using any of the deprecated [actions/cache](https://github.com/actions/cache) will fail.
 
 Upgrading to the recommended versions will not break your workflows.
 
+> **Additionally, if you are managing your own GitHub runners, you must update your runner version to `2.231.0` or newer to ensure compatibility with the new cache service.**  
+> Failure to update both the action version and your runner version may result in workflow failures after the migration date.
+
 Read more about the change & access the migration guide: [reference to the announcement](https://github.com/actions/cache/discussions/1510).
+
+### v5
+
+* Updated to node 24
+* Requires a minimum Actions Runner version of `2.327.1`
 
 ### v4
 
@@ -65,6 +77,8 @@ See the [v2 README.md](https://github.com/actions/cache/blob/v2/README.md) for o
 Create a workflow `.yml` file in your repository's `.github/workflows` directory. An [example workflow](#example-cache-workflow) is available below. For more information, see the GitHub Help Documentation for [Creating a workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file).
 
 If you are using this inside a container, a POSIX-compliant `tar` needs to be included and accessible from the execution path.
+
+Note: `actions/cache@v5` runs on Node.js 24 and requires a minimum Actions Runner version of `2.327.1`.
 
 If you are using a `self-hosted` Windows runner, `GNU tar` and `zstd` are required for [Cross-OS caching](https://github.com/actions/cache/blob/main/tips-and-workarounds.md#cross-os-cache) to work. They are also recommended to be installed in general so the performance is on par with `hosted` Windows runners.
 
@@ -111,11 +125,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Cache Primes
       id: cache-primes
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: prime-numbers
         key: ${{ runner.os }}-primes
@@ -142,11 +156,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Restore cached Primes
       id: cache-primes-restore
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: |
           path/to/dependencies
@@ -157,7 +171,7 @@ jobs:
     .
     - name: Save Primes
       id: cache-primes-save
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: |
           path/to/dependencies
@@ -212,7 +226,7 @@ A cache key can include any of the contexts, functions, literals, and operators 
 For example, using the [`hashFiles`](https://docs.github.com/en/actions/learn-github-actions/expressions#hashfiles) function allows you to create a new cache when dependencies change.
 
 ```yaml
-  - uses: actions/cache@v4
+  - uses: actions/cache@v5
     with:
       path: |
         path/to/dependencies
@@ -230,7 +244,7 @@ Additionally, you can use arbitrary command output in a cache key, such as a dat
       echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
     shell: bash
 
-  - uses: actions/cache@v4
+  - uses: actions/cache@v5
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('**/lockfiles') }}
@@ -250,9 +264,9 @@ Example:
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v6
 
-  - uses: actions/cache@v4
+  - uses: actions/cache@v5
     id: cache
     with:
       path: path/to/dependencies
@@ -280,11 +294,11 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Cache Primes
         id: cache-primes
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: prime-numbers
           key: primes
@@ -295,7 +309,7 @@ jobs:
 
       - name: Cache Numbers
         id: cache-numbers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: numbers
           key: primes
@@ -307,11 +321,11 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Cache Primes
         id: cache-primes
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: prime-numbers
           key: primes
@@ -337,9 +351,23 @@ There are a number of community practices/workarounds to fulfill specific requir
 
 Please note that Windows environment variables (like `%LocalAppData%`) will NOT be expanded by this action. Instead, prefer using `~` in your paths which will expand to the HOME directory. For example, instead of `%LocalAppData%`, use `~\AppData\Local`. For a list of supported default environment variables, see the [Learn GitHub Actions: Variables](https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables) page.
 
-## Contributing
+## Note
 
-We would love for you to contribute to `actions/cache`. Pull requests are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+Thank you for your interest in this GitHub repo, however, right now we are not taking contributions. 
+
+We continue to focus our resources on strategic areas that help our customers be successful while making developers' lives easier. While GitHub Actions remains a key part of this vision, we are allocating resources towards other areas of Actions and are not taking contributions to this repository at this time. The GitHub public roadmap is the best place to follow along for any updates on features we’re working on and what stage they’re in.
+
+We are taking the following steps to better direct requests related to GitHub Actions, including:
+
+1. We will be directing questions and support requests to our [Community Discussions area](https://github.com/orgs/community/discussions/categories/actions)
+
+2. High Priority bugs can be reported through Community Discussions or you can report these to our support team https://support.github.com/contact/bug-report.
+
+3. Security Issues should be handled as per our [security.md](SECURITY.md).
+
+We will still provide security updates for this project and fix major breaking changes during this time.
+
+You are welcome to still raise bugs in this repo.
 
 ## License
 
